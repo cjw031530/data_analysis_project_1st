@@ -208,6 +208,91 @@ def suggest_params(trial: optuna.Trial, search: dict) -> dict:
     return params
 
 
+def write_json(path: Path, value: dict) -> None:
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+
+
+def write_json_atomic(path: Path, value: dict) -> None:
+    temporary = path.with_name(path.name + ".tmp")
+    write_json(temporary, value)
+    os.replace(temporary, path)
+
+
+def checkpointed_trial(prepared: list, params: dict, number: int, args,
+                       checkpoint_root: Path, config_sha256: str, progress: tqdm,
+                       expected_error: float | None = None) -> tuple[float, dict]:
+    """Keep every completed fold model so an interrupted trial can resume."""
+    trial_dir = checkpoint_root / f"trial_{number:05d}"
+    trial_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = trial_dir / "manifest.json"
+    if manifest_path.exists():
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if manifest.get("params") != params or manifest.get("config_sha256") != config_sha256:
+            raise ValueError(f"Checkpoint does not match the current trial: {trial_dir}")
+    else:
+        manifest = {"trial_number": number, "params": params,
+                    "config_sha256": config_sha256, "folds": {}}
+        write_json_atomic(manifest_path, manifest)
+
+    labels, scores, fold_records, best_rounds = [], [], [], []
+    for fold_number, (x_train, y_train, x_valid, y_valid, month) in enumerate(prepared, start=1):
+        progress.set_postfix_str(f"trial={number + 1} fold={fold_number}/{len(prepared)}")
+        key = str(fold_number)
+        model_path = trial_dir / f"fold_{fold_number:02d}.ubj"
+        saved = manifest["folds"].get(key)
+        if saved is not None:
+            if saved["month"] != month or not model_path.is_file():
+                raise ValueError(f"Incomplete checkpoint metadata: {model_path}")
+            with model_path.open("rb") as source:
+                digest = hashlib.file_digest(source, "sha256").hexdigest()
+            if digest != saved["model_sha256"]:
+                raise ValueError(f"Checkpoint hash mismatch: {model_path}")
+            model = xgb.XGBClassifier()
+            model.load_model(str(model_path))
+            best_round = int(saved["best_round"])
+        else:
+            model = make_model(params, args.rounds, args.jobs, args.seed, args.early_stopping)
+            model.fit(x_train, y_train, eval_set=[(x_valid, y_valid)], verbose=False)
+            best_round = int(model.best_iteration) + 1
+            temporary = model_path.with_name(model_path.stem + ".tmp.ubj")
+            model.save_model(str(temporary))
+            os.replace(temporary, model_path)
+            with model_path.open("rb") as source:
+                digest = hashlib.file_digest(source, "sha256").hexdigest()
+            manifest["folds"][key] = {"month": month, "best_round": best_round,
+                                      "model_sha256": digest}
+            write_json_atomic(manifest_path, manifest)
+
+        probability = model.predict_proba(x_valid, iteration_range=(0, best_round))[:, 1]
+        labels.append(y_valid)
+        scores.append(probability)
+        best_rounds.append(best_round)
+        fold_records.append({"month": month, "best_round": best_round,
+                             "log_loss": float(log_loss(y_valid, probability))})
+
+    labels_all = np.concatenate(labels)
+    scores_all = np.concatenate(scores)
+    threshold, error = best_threshold(labels_all, scores_all)
+    if expected_error is not None and not np.isclose(error, expected_error, rtol=0, atol=1e-6):
+        raise ValueError(f"Replayed trial {number} differs from its stored Optuna score")
+    attrs = {"threshold": threshold, "best_rounds": best_rounds, "folds": fold_records,
+             "oof_ap": float(average_precision_score(labels_all, scores_all))}
+    manifest["result"] = {"error": error, **attrs}
+    write_json_atomic(manifest_path, manifest)
+    return error, attrs
+
+
+def has_complete_checkpoint(root: Path, number: int, fold_count: int) -> bool:
+    trial_dir = root / f"trial_{number:05d}"
+    manifest_path = trial_dir / "manifest.json"
+    if not manifest_path.is_file():
+        return False
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    return ("result" in manifest and len(manifest.get("folds", {})) == fold_count
+            and all((trial_dir / f"fold_{fold:02d}.ubj").is_file()
+                    for fold in range(1, fold_count + 1)))
+
+
 def tune(frame: pd.DataFrame, schema: dict, include_month: bool, args, output: Path) -> tuple[dict, int, dict]:
     variant = "month_index" if include_month else "no_month"
     folds = FOLDS[-args.folds:]
@@ -226,65 +311,70 @@ def tune(frame: pd.DataFrame, schema: dict, include_month: bool, args, output: P
               "sklearn": sklearn.__version__, "pandas": pd.__version__,
               "train_sha256": args.train_sha256, "jobs": args.jobs,
               "search": args.search, "baseline": args.baseline}
+    # The code hash changes when checkpoint support is added. All settings that
+    # affect model results still have to match the existing study exactly.
+    comparable_config = {key: value for key, value in config.items() if key != "train_sha256"}
+    config_sha256 = hashlib.sha256(json.dumps(comparable_config, sort_keys=True).encode()).hexdigest()
+    checkpoint_root = output / "checkpoints" / variant
     study = optuna.create_study(
         direction="minimize", study_name=variant,
         storage=f"sqlite:///{(output / (variant + '.sqlite3')).as_posix()}",
         load_if_exists=True,
         sampler=optuna.samplers.TPESampler(seed=args.seed, n_startup_trials=args.startup_trials),
     )
-    if study.user_attrs.get("config") not in (None, config):
+    stored_config = study.user_attrs.get("config")
+    if stored_config is not None and {key: value for key, value in stored_config.items()
+                                      if key != "train_sha256"} != comparable_config:
         raise ValueError(f"Existing Optuna study has a different configuration: {variant}")
-    study.set_user_attr("config", config)
+    if stored_config != config:
+        study.set_user_attr("config", config)
     if not study.trials:
         study.enqueue_trial(args.baseline)
-
-    def objective(trial: optuna.Trial) -> float:
-        params = suggest_params(trial, args.search)
-        labels, scores, fold_records, best_rounds = [], [], [], []
-        for fold_number, (x_train, y_train, x_valid, y_valid, month) in enumerate(prepared, start=1):
-            progress.set_postfix_str(f"trial={trial.number + 1} fold={fold_number}/{len(prepared)}")
-            model = make_model(params, args.rounds, args.jobs, args.seed, args.early_stopping)
-            model.fit(x_train, y_train, eval_set=[(x_valid, y_valid)], verbose=False)
-            probability = model.predict_proba(x_valid)[:, 1]
-            labels.append(y_valid)
-            scores.append(probability)
-            best_rounds.append(int(model.best_iteration) + 1)
-            fold_records.append({"month": month, "best_round": best_rounds[-1],
-                                 "log_loss": float(log_loss(y_valid, probability))})
-        labels_all = np.concatenate(labels)
-        scores_all = np.concatenate(scores)
-        threshold, error = best_threshold(labels_all, scores_all)
-        trial.set_user_attr("threshold", threshold)
-        trial.set_user_attr("best_rounds", best_rounds)
-        trial.set_user_attr("folds", fold_records)
-        trial.set_user_attr("oof_ap", float(average_precision_score(labels_all, scores_all)))
-        return error
+    # study.optimize() marked interrupted trials as FAIL in older runs. Repeat
+    # their exact parameter sets before sampling anything new.
+    retried = set(study.user_attrs.get("retried_failed_trials", []))
+    for frozen in study.get_trials(deepcopy=False, states=(optuna.trial.TrialState.FAIL,)):
+        if frozen.number not in retried:
+            if set(frozen.params) != set(args.search):
+                raise ValueError(f"Failed trial {frozen.number} lacks parameters needed for recovery")
+            study.enqueue_trial(frozen.params, user_attrs={"retry_of": frozen.number})
+            retried.add(frozen.number)
+            study.set_user_attr("retried_failed_trials", sorted(retried))
 
     completed = sum(t.state == optuna.trial.TrialState.COMPLETE for t in study.trials)
-    remaining = max(0, args.trials - completed)
     with tqdm(total=args.trials, initial=min(completed, args.trials),
               desc=f"Optuna {variant}", unit="trial", dynamic_ncols=True) as progress:
         if completed:
             progress.set_postfix_str(f"best_error={study.best_value:.5f}")
+        # Older studies have metrics but no model files. Refit those trials once
+        # so every completed trial has the same recoverable model artifacts.
+        for frozen in study.get_trials(deepcopy=False, states=(optuna.trial.TrialState.COMPLETE,)):
+            if not has_complete_checkpoint(checkpoint_root, frozen.number, len(prepared)):
+                print(f"Saving models for completed {variant} trial {frozen.number + 1}", flush=True)
+                checkpointed_trial(prepared, frozen.params, frozen.number, args,
+                                   checkpoint_root, config_sha256, progress,
+                                   expected_error=frozen.value)
 
-        def update_progress(current_study: optuna.Study, _trial: optuna.trial.FrozenTrial) -> None:
+        while completed < args.trials:
+            running = study.get_trials(deepcopy=False, states=(optuna.trial.TrialState.RUNNING,))
+            if len(running) > 1:
+                raise ValueError(f"Multiple unfinished trials in {variant}; run only one trainer per output directory")
+            trial = optuna.trial.Trial(study, running[0]._trial_id) if running else study.ask()
+            params = suggest_params(trial, args.search)
+            error, attrs = checkpointed_trial(prepared, params, trial.number, args,
+                                               checkpoint_root, config_sha256, progress)
+            for key, value in attrs.items():
+                trial.set_user_attr(key, value)
+            study.tell(trial, error)
+            completed += 1
             progress.update(1)
-            if current_study.best_trials:
-                progress.set_postfix_str(f"best_error={current_study.best_value:.5f}")
-
-        if remaining:
-            study.optimize(objective, n_trials=remaining, n_jobs=1,
-                           callbacks=[update_progress], show_progress_bar=False)
+            progress.set_postfix_str(f"best_error={study.best_value:.5f}")
     best = study.best_trial
     rounds = max(1, int(np.median(best.user_attrs["best_rounds"])))
     return best.params, rounds, {"cv_error": best.value, "cv_threshold": best.user_attrs["threshold"],
                                  "best_rounds": best.user_attrs["best_rounds"],
                                  "oof_ap": best.user_attrs["oof_ap"],
                                  "trials": len(study.trials)}
-
-
-def write_json(path: Path, value: dict) -> None:
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
 
 
 def configured_args(cfg: DictConfig) -> SimpleNamespace:

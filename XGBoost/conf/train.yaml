@@ -5,7 +5,7 @@ paths:
 
 seed: 42
 cpu:
-  jobs: 0  # 0 uses every detected logical CPU core for each XGBoost fit.
+  jobs: 8  # 0 uses every detected logical CPU core for each XGBoost fit.
 variants: [no_month, month_index]
 
 tuning:

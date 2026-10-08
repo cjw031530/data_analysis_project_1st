@@ -15,6 +15,20 @@
 .\.venv\Scripts\python.exe XGBoost\train.py --cfg job
 ```
 
+## Trial checkpoint와 재개
+
+각 trial의 시간 순서 fold 모델은 `paths.output_dir/checkpoints/<variant>/trial_<번호>/fold_<번호>.ubj`에
+저장된다. 같은 디렉터리의 `manifest.json`에는 모델 해시, hyperparameter, fold별 최적 반복 횟수와
+평가 결과가 기록된다. 중단된 trial은 저장된 fold 모델을 읽고, 아직 완료되지 않은 fold부터 다시 학습한다.
+fold 학습 도중에 중단되었다면 해당 fold는 처음부터 다시 학습한다.
+
+학습을 중단한 다음 같은 명령과 같은 `paths.output_dir`로 재실행하면 SQLite study의 완료된 trial을
+건너뛰고 진행 중이던 trial을 재개한다. 이전 버전에서 완료되어 모델 파일이 없는 trial은 재실행 시
+모델 파일을 한 번 생성한다. 이전 버전에서 실패로 표시된 trial은 같은 hyperparameter로 다시 실행한다.
+한 출력 디렉터리에는 학습 프로세스를 하나만 실행한다. 이미 실행 중인 Python 프로세스에는 코드 변경이
+즉시 적용되지 않으므로 새 저장 방식은 그 프로세스를 종료하고 다시 실행할 때부터 적용된다.
+모든 trial의 fold 모델을 보관하므로 디스크 사용량이 커질 수 있다.
+
 `cpu.jobs=0`은 감지된 논리 CPU 코어 전부를 각 XGBoost 학습에 사용한다. Optuna trial은
 CPU 경합을 피하도록 순차 실행한다. tqdm에 전처리 fold와 trial 진행도, 현재 fold,
 최고 오분류율이 표시된다.
