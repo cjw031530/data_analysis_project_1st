@@ -1,0 +1,34 @@
+paths:
+  data: kcb_202306_202405_undersampled_1to4.csv
+  feature_types: preprocess/feature_types.csv
+  output_dir: TabICL/outputs
+
+seed: 42
+features:
+  top_k: 100
+  selector_trees: 100
+  selector_depth: 4
+  selector_jobs: 8
+variants: [no_month, month_index]
+
+context:
+  max_rows: 10000  # Explicit stratified sample of each available training period.
+
+model:
+  checkpoint_version: tabicl-classifier-v2-20260212.ckpt
+  model_path: null  # null uses the Hugging Face cache outside this repository.
+  device: null  # null auto-detects; the current Windows environment uses CPU.
+  n_estimators: 8
+  batch_size: 2
+  kv_cache: false
+  offload_mode: auto
+  n_jobs: 8
+
+prediction:
+  batch_rows: 2048
+
+hydra:
+  run:
+    dir: ${paths.output_dir}/hydra/train/${now:%Y%m%d_%H%M%S}
+  job:
+    chdir: false

@@ -7,3 +7,4 @@ optuna==5.0.0
 scikit-learn==1.9.1
 hydra-core==1.3.2
 tqdm==4.70.1
+tabicl==2.2.0

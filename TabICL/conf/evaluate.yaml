@@ -1,0 +1,12 @@
+paths:
+  input: ???
+  data: kcb_202306_202405_undersampled_1to4.csv
+  feature_types: preprocess/feature_types.csv
+  model_dir: TabICL/outputs
+  output: null  # Defaults to predictions.csv inside model_dir.
+
+hydra:
+  run:
+    dir: ${paths.model_dir}/hydra/evaluate/${now:%Y%m%d_%H%M%S}
+  job:
+    chdir: false
