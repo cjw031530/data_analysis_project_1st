@@ -1,0 +1,138 @@
+{
+  "split": {
+    "train": "202306-202401",
+    "validation": "202402-202403",
+    "test": "202404-202405"
+  },
+  "run_config": {
+    "paths": {
+      "data": "kcb_202306_202405_undersampled_1to4.csv",
+      "feature_types": "preprocess/feature_types.csv",
+      "output_dir": "TabPFN/outputs"
+    },
+    "seed": 42,
+    "features": {
+      "top_k": 40,
+      "selector_rows": 10000,
+      "selector_trees": 50,
+      "selector_depth": 4,
+      "selector_jobs": 2
+    },
+    "variant": "no_month",
+    "context": {
+      "max_rows": 1000
+    },
+    "model": {
+      "version": "v2",
+      "device": "cuda",
+      "n_estimators": 1,
+      "preprocessing_jobs": 1,
+      "fit_mode": "fit_preprocessors"
+    },
+    "prediction": {
+      "batch_rows": 1024
+    }
+  },
+  "selector": "XGBoost gain fitted on stratified 202306-202401 rows only",
+  "selector_rows": 10000,
+  "validation": {
+    "rows": 25553,
+    "positive_rate": 0.20631628380229328,
+    "threshold": 0.5341265201568604,
+    "misclassification_rate": 0.197745861542676,
+    "average_precision": 0.4009771039721292,
+    "roc_auc": 0.6980383268716416,
+    "log_loss": 0.4858397841453552,
+    "precision": 0.589242053789731,
+    "recall": 0.13713960546282244,
+    "tn": 19777,
+    "fp": 504,
+    "fn": 4549,
+    "tp": 723
+  },
+  "validation_by_month": {
+    "202402": {
+      "rows": 12460,
+      "positive_rate": 0.20617977528089887,
+      "threshold": 0.5341265201568604,
+      "misclassification_rate": 0.1971107544141252,
+      "average_precision": 0.40608672669299595,
+      "roc_auc": 0.7066277583306937,
+      "log_loss": 0.47970592975616455,
+      "precision": 0.5906902086677368,
+      "recall": 0.14324639937718958,
+      "tn": 9636,
+      "fp": 255,
+      "fn": 2201,
+      "tp": 368
+    },
+    "202403": {
+      "rows": 13093,
+      "positive_rate": 0.20644619262201175,
+      "threshold": 0.5341265201568604,
+      "misclassification_rate": 0.19835026349957993,
+      "average_precision": 0.3963515371756026,
+      "roc_auc": 0.6899595038770951,
+      "log_loss": 0.4916771352291107,
+      "precision": 0.5877483443708609,
+      "recall": 0.1313355530891602,
+      "tn": 10141,
+      "fp": 249,
+      "fn": 2348,
+      "tp": 355
+    }
+  },
+  "test": {
+    "rows": 28679,
+    "positive_rate": 0.2256006136894592,
+    "threshold": 0.5341265201568604,
+    "misclassification_rate": 0.2094215279472785,
+    "average_precision": 0.45588249203258147,
+    "roc_auc": 0.7185652174790524,
+    "log_loss": 0.49162402749061584,
+    "precision": 0.6629213483146067,
+    "recall": 0.14590417310664605,
+    "tn": 21729,
+    "fp": 480,
+    "fn": 5526,
+    "tp": 944
+  },
+  "test_by_month": {
+    "202404": {
+      "rows": 13966,
+      "positive_rate": 0.21401976227982242,
+      "threshold": 0.5341265201568604,
+      "misclassification_rate": 0.19984247458112558,
+      "average_precision": 0.43932865923242875,
+      "roc_auc": 0.7175475605140869,
+      "log_loss": 0.47631001472473145,
+      "precision": 0.6556603773584906,
+      "recall": 0.13951154232184676,
+      "tn": 10758,
+      "fp": 219,
+      "fn": 2572,
+      "tp": 417
+    },
+    "202405": {
+      "rows": 14713,
+      "positive_rate": 0.23659348875144431,
+      "threshold": 0.5341265201568604,
+      "misclassification_rate": 0.21851423910827159,
+      "average_precision": 0.47051659801772433,
+      "roc_auc": 0.7190519929720229,
+      "log_loss": 0.5061604976654053,
+      "precision": 0.6687817258883249,
+      "recall": 0.15139327779373743,
+      "tn": 10971,
+      "fp": 261,
+      "fn": 2954,
+      "tp": 527
+    }
+  },
+  "environment": {
+    "python": "3.13.14",
+    "tabpfn": "9.1.0",
+    "torch": "2.14.1+cu126"
+  },
+  "note": "Test context ends 202403. Future predictions reconstruct a context through 202405."
+}

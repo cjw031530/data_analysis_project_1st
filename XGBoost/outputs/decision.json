@@ -1,0 +1,18 @@
+{
+  "variant": "no_month",
+  "threshold": 0.521276593208313,
+  "params": {
+    "learning_rate": 0.026001407811253794,
+    "max_depth": 9,
+    "min_child_weight": 0.11556072464203906,
+    "subsample": 0.9257873930355743,
+    "colsample_bytree": 0.6409273873867,
+    "gamma": 1.1816482762165625,
+    "reg_alpha": 0.01864809565736371,
+    "reg_lambda": 1.3954498518315706,
+    "scale_pos_weight": 3.632416040581159,
+    "max_cat_to_onehot": 8,
+    "max_cat_threshold": 64
+  },
+  "rounds": 1530
+}

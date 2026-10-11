@@ -2,6 +2,18 @@ kcb_202306_202405_undersampled_1to4.csv
 .venv/
 __pycache__/
 .ipynb_checkpoints/
-XGBoost/outputs/
-TabICL/outputs/
-TabICL/checkpoints/
+# Keep published results while excluding training state and checkpoints.
+**/checkpoints/
+XGBoost/outputs/*
+!XGBoost/outputs/decision.json
+!XGBoost/outputs/feature_schema.json
+!XGBoost/outputs/metrics.json
+!XGBoost/outputs/model.json
+TabICL/outputs/*
+!TabICL/outputs/decision.json
+!TabICL/outputs/metrics.json
+TabPFN/outputs/*
+!TabPFN/outputs/decision.json
+!TabPFN/outputs/metrics.json
+!TabPFN/outputs/predictions.csv
+TabPFN/.torch_cuda/

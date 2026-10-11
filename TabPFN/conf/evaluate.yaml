@@ -1,0 +1,15 @@
+paths:
+  input: kcb_202306_202405_undersampled_1to4.csv
+  data: kcb_202306_202405_undersampled_1to4.csv
+  feature_types: preprocess/feature_types.csv
+  model_dir: TabPFN/outputs
+  output: null
+context_end: 202403  # Holdout evaluation. For future inference set this to 202405.
+input_start: 202404  # Set null for all rows in a future input CSV.
+input_end: 202405
+
+hydra:
+  run:
+    dir: ${paths.model_dir}/hydra/evaluate/${now:%Y%m%d_%H%M%S}
+  job:
+    chdir: false
