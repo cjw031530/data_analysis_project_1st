@@ -1,0 +1,29 @@
+paths:
+  data: kcb_202306_202405_undersampled_1to4.csv
+  feature_types: preprocess/feature_types.csv
+  output_dir: TabPFN/outputs
+
+seed: 42
+features:
+  top_k: 40
+  selector_rows: 10000
+  selector_trees: 50
+  selector_depth: 4
+  selector_jobs: 4
+variant: no_month
+context:
+  max_rows: 1000
+model:
+  version: v2
+  device: cpu
+  n_estimators: 1
+  preprocessing_jobs: 1
+  fit_mode: fit_preprocessors
+prediction:
+  batch_rows: 1024
+
+hydra:
+  run:
+    dir: ${paths.output_dir}/hydra/train/${now:%Y%m%d_%H%M%S}
+  job:
+    chdir: false

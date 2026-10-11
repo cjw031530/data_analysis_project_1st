@@ -5,3 +5,6 @@ __pycache__/
 XGBoost/outputs/
 TabICL/outputs/
 TabICL/checkpoints/
+TabPFN/outputs/
+TabPFN/checkpoints/
+TabPFN/.torch_cuda/
