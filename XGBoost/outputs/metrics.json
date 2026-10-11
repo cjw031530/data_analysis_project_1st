@@ -1,0 +1,266 @@
+{
+  "split": {
+    "tune": "202306-202401",
+    "validation": "202402-202403",
+    "test": "202404-202405",
+    "final_fit": "202306-202405"
+  },
+  "run_config": {
+    "trials_per_variant": 109,
+    "random_startup_trials": 40,
+    "folds": [
+      [
+        "202309",
+        "202310"
+      ],
+      [
+        "202310",
+        "202311"
+      ],
+      [
+        "202311",
+        "202312"
+      ],
+      [
+        "202312",
+        "202401"
+      ]
+    ],
+    "max_rounds": 4000,
+    "early_stopping_rounds": 100,
+    "seed": 42,
+    "cpu_threads": 8,
+    "hydra": {
+      "paths": {
+        "data": "kcb_202306_202405_undersampled_1to4.csv",
+        "feature_types": "preprocess/feature_types.csv",
+        "output_dir": "XGBoost/outputs"
+      },
+      "seed": 42,
+      "cpu": {
+        "jobs": 8
+      },
+      "variants": [
+        "no_month"
+      ],
+      "tuning": {
+        "trials": 109,
+        "startup_trials": 40,
+        "folds": 4,
+        "rounds": 4000,
+        "early_stopping": 100,
+        "search": {
+          "learning_rate": {
+            "low": 0.01,
+            "high": 0.2,
+            "log": true
+          },
+          "max_depth": {
+            "low": 3,
+            "high": 10
+          },
+          "min_child_weight": {
+            "low": 0.1,
+            "high": 50.0,
+            "log": true
+          },
+          "subsample": {
+            "low": 0.6,
+            "high": 1.0
+          },
+          "colsample_bytree": {
+            "low": 0.5,
+            "high": 1.0
+          },
+          "gamma": {
+            "low": 0.0,
+            "high": 10.0
+          },
+          "reg_alpha": {
+            "low": 1e-08,
+            "high": 10.0,
+            "log": true
+          },
+          "reg_lambda": {
+            "low": 0.001,
+            "high": 100.0,
+            "log": true
+          },
+          "scale_pos_weight": {
+            "low": 1.0,
+            "high": 4.0
+          },
+          "max_cat_to_onehot": {
+            "choices": [
+              4,
+              8,
+              16
+            ]
+          },
+          "max_cat_threshold": {
+            "choices": [
+              16,
+              32,
+              64
+            ]
+          }
+        },
+        "baseline": {
+          "learning_rate": 0.05,
+          "max_depth": 6,
+          "min_child_weight": 1.0,
+          "subsample": 0.8,
+          "colsample_bytree": 0.8,
+          "gamma": 0.0,
+          "reg_alpha": 1e-08,
+          "reg_lambda": 1.0,
+          "scale_pos_weight": 1.0,
+          "max_cat_to_onehot": 4,
+          "max_cat_threshold": 32
+        }
+      }
+    }
+  },
+  "candidates": {
+    "no_month": {
+      "params": {
+        "learning_rate": 0.026001407811253794,
+        "max_depth": 9,
+        "min_child_weight": 0.11556072464203906,
+        "subsample": 0.9257873930355743,
+        "colsample_bytree": 0.6409273873867,
+        "gamma": 1.1816482762165625,
+        "reg_alpha": 0.01864809565736371,
+        "reg_lambda": 1.3954498518315706,
+        "scale_pos_weight": 3.632416040581159,
+        "max_cat_to_onehot": 8,
+        "max_cat_threshold": 64
+      },
+      "rounds": 1530,
+      "cv_rounds_median": 1541,
+      "cv": {
+        "cv_error": 0.13840324153973138,
+        "cv_threshold": 0.5087035894393921,
+        "best_rounds": [
+          1251,
+          1580,
+          1508,
+          1575
+        ],
+        "oof_ap": 0.6390804973459484,
+        "trials": 110
+      },
+      "validation": {
+        "rows": 25553,
+        "positive_rate": 0.20631628380229328,
+        "threshold": 0.521276593208313,
+        "misclassification_rate": 0.15778969201267953,
+        "average_precision": 0.6221518664635011,
+        "roc_auc": 0.8240371023089178,
+        "log_loss": 0.3798585534095764,
+        "precision": 0.7246376811594203,
+        "recall": 0.37936267071320184,
+        "tn": 19521,
+        "fp": 760,
+        "fn": 3272,
+        "tp": 2000
+      },
+      "validation_by_month": {
+        "202402": {
+          "rows": 12460,
+          "positive_rate": 0.20617977528089887,
+          "threshold": 0.521276593208313,
+          "misclassification_rate": 0.149438202247191,
+          "average_precision": 0.6516109891404348,
+          "roc_auc": 0.8403170659841946,
+          "log_loss": 0.3642106056213379,
+          "precision": 0.7396610169491525,
+          "recall": 0.42467886337096145,
+          "tn": 9507,
+          "fp": 384,
+          "fn": 1478,
+          "tp": 1091
+        },
+        "202403": {
+          "rows": 13093,
+          "positive_rate": 0.20644619262201175,
+          "threshold": 0.521276593208313,
+          "misclassification_rate": 0.1657374169403498,
+          "average_precision": 0.5933349819928673,
+          "roc_auc": 0.8088704597643441,
+          "log_loss": 0.3947499692440033,
+          "precision": 0.7073929961089495,
+          "recall": 0.3362930077691454,
+          "tn": 10014,
+          "fp": 376,
+          "fn": 1794,
+          "tp": 909
+        }
+      },
+      "threshold": 0.521276593208313
+    }
+  },
+  "chosen": "no_month",
+  "test_before_refit": {
+    "rows": 28679,
+    "positive_rate": 0.2256006136894592,
+    "threshold": 0.521276593208313,
+    "misclassification_rate": 0.18752397224449946,
+    "average_precision": 0.5796471986933456,
+    "roc_auc": 0.791567623385064,
+    "log_loss": 0.4332135319709778,
+    "precision": 0.7103235747303543,
+    "recall": 0.28500772797527046,
+    "tn": 21457,
+    "fp": 752,
+    "fn": 4626,
+    "tp": 1844
+  },
+  "test_by_month": {
+    "202404": {
+      "rows": 13966,
+      "positive_rate": 0.21401976227982242,
+      "threshold": 0.521276593208313,
+      "misclassification_rate": 0.1782901331805814,
+      "average_precision": 0.5687738870874783,
+      "roc_auc": 0.7923934326260759,
+      "log_loss": 0.41943442821502686,
+      "precision": 0.7016976556184317,
+      "recall": 0.2903981264637002,
+      "tn": 10608,
+      "fp": 369,
+      "fn": 2121,
+      "tp": 868
+    },
+    "202405": {
+      "rows": 14713,
+      "positive_rate": 0.23659348875144431,
+      "threshold": 0.521276593208313,
+      "misclassification_rate": 0.19628899612587508,
+      "average_precision": 0.5897928833058002,
+      "roc_auc": 0.7907556108414339,
+      "log_loss": 0.44629305601119995,
+      "precision": 0.7181751287711553,
+      "recall": 0.2803792013789141,
+      "tn": 10849,
+      "fp": 383,
+      "fn": 2505,
+      "tp": 976
+    }
+  },
+  "note": "Test metrics are for the selected pre-refit model; the final model uses all months through 202405.",
+  "environment": {
+    "python": "3.13.14",
+    "xgboost": "3.4.1",
+    "optuna": "5.0.0",
+    "hydra": "1.3.2",
+    "sklearn": "1.9.1",
+    "pandas": "2.3.3",
+    "cpu_threads": 8,
+    "git_commit": "847eb0bc1644ee3ff543fc7cb2c7916de4a31367",
+    "data_sha256": "e0ab19c3114fcd52a5cac246fb3af0e6fa35d38d83b51f7c49fa30c944ff4e78",
+    "types_sha256": "64653a2745b8300f102ea07eb88cebfa8c80d3be27b5e5744f06f7d234bb0c40",
+    "train_sha256": "b073efbedfd23ef5ba70d4fc2eb6952e29dbccc7662411c743b235e8188f9758",
+    "evaluate_sha256": "3b238543445e76f2988d4b411da61696cff7d3daa5316bf789ce60b70caeb189"
+  }
+}

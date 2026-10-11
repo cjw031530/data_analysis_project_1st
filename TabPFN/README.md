@@ -28,4 +28,4 @@ To repeat the 202404–202405 holdout evaluation from the source CSV, or predict
 .\.venv\Scripts\python.exe -m TabPFN.evaluate paths.input=future.csv context_end=202405 input_start=null input_end=null
 ```
 
-Evaluation reconstructs the sampled context from the original CSV and checks its SHA-256 hash against the saved decision. `predictions.csv` is written inside the model output directory by default. The output directory and downloaded checkpoints are excluded from Git.
+Evaluation reconstructs the sampled context from the original CSV and checks its SHA-256 hash against the saved decision. `predictions.csv` is written inside the model output directory by default. Published decisions, metrics, and predictions are included in Git; checkpoints and temporary outputs are excluded.

@@ -40,7 +40,8 @@ CPU 경합을 피하도록 순차 실행한다. tqdm에 전처리 fold와 trial 
 
 `paths.output_dir`에는 재개 가능한 Optuna SQLite study, `metrics.json`,
 `decision.json`, `feature_schema.json`, `model.json`이 저장된다. Hydra 설정 기록도
-같은 출력 디렉터리의 `hydra/` 아래에 생성된다. 모두 Git에서 제외한다. 같은 설정과
+같은 출력 디렉터리의 `hydra/` 아래에 생성된다. 최종 결과 JSON은 Git에 포함하고,
+trial checkpoint, SQLite study, Hydra 기록은 제외한다. 같은 설정과
 출력 디렉터리로 다시 실행하면 완료한 trial 수를 기준으로 재개한다. fold, 탐색 범위,
 seed, 라이브러리 버전 등을 바꿀 때는 새 `paths.output_dir`를 지정한다.
 
