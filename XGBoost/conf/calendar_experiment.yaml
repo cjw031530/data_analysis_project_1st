@@ -1,0 +1,15 @@
+defaults:
+  - preprocessing_experiment
+  - _self_
+
+paths:
+  output_dir: XGBoost/outputs/calendar_experiment
+methods: [raw_minimal, numeric_categories, cardinality5]
+calendar_modes: [no_month, month_index]
+reuse:
+  enabled: true
+  output_dir: XGBoost/outputs/preprocessing_experiment
+
+hydra:
+  run:
+    dir: ${paths.output_dir}/hydra/${now:%Y%m%d_%H%M%S}
