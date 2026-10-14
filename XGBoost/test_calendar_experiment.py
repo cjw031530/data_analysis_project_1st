@@ -129,6 +129,9 @@ def verify_saved_results(output_dir="XGBoost/outputs/calendar_experiment"):
             errors = predictions != labels
             row_weights = source.loc[indices, "LNMON"].map(weights).to_numpy(dtype=float)
             assert abs(float(np.dot(row_weights, errors) / len(indices)) - result["test"]["weighted_score"]) < 1e-12
+            if "weighted_misclassification_rate" in result["test"]:
+                assert abs(float(np.dot(row_weights, errors) / row_weights.sum())
+                           - result["test"]["weighted_misclassification_rate"]) < 1e-12
             assert abs(float(errors.mean()) - result["test"]["misclassification_rate"]) < 1e-12
             for month in weights:
                 mask = source.loc[indices, "LNMON"].eq(month).to_numpy()

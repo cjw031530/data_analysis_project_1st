@@ -37,7 +37,9 @@
     "cardinality5": "Existing integer/spacing type rules are retained; numeric-coded categories with >5 train-only distinct numeric levels become numeric. Text categories and boolean roles are unchanged.",
     "threshold_selection": "One threshold minimizing pooled F7-F9 OOF errors; frozen before F10-F12",
     "rounds_selection": "Median best rounds from F7-F9; no test early stopping",
-    "selection": "Six common-parameter conditions first; only CV top two receive 12-trial TPE"
+    "selection": "Six common-parameter conditions first; only CV top two receive 12-trial TPE",
+    "weighted_misclassification_rate_formula": "sum(row_weight * error) / sum(row_weight)",
+    "ordinary_misclassification_rate_formula": "count(errors) / total_test_rows"
   },
   "tuning_finalists": [
     "cardinality5__month_index",
@@ -13507,7 +13509,10 @@
         "fn": 6493,
         "tp": 2680,
         "weighted_score": 0.06351623096811258,
-        "all_zero_weighted_score": 0.07793737431772482
+        "all_zero_weighted_score": 0.07793737431772482,
+        "weighted_misclassification_rate": 0.1851900969504917,
+        "sum_row_weights": 14326.9,
+        "weighted_error_count": 2653.2
       },
       "test_by_month": {
         "202403": {
@@ -19938,7 +19943,10 @@
         "fn": 6187,
         "tp": 2986,
         "weighted_score": 0.06338216987455711,
-        "all_zero_weighted_score": 0.07793737431772482
+        "all_zero_weighted_score": 0.07793737431772482,
+        "weighted_misclassification_rate": 0.18479922383767597,
+        "sum_row_weights": 14326.9,
+        "weighted_error_count": 2647.6
       },
       "test_by_month": {
         "202403": {
@@ -23980,7 +23988,10 @@
         "fn": 6177,
         "tp": 2996,
         "weighted_score": 0.06296562290529541,
-        "all_zero_weighted_score": 0.07793737431772482
+        "all_zero_weighted_score": 0.07793737431772482,
+        "weighted_misclassification_rate": 0.1835847252371413,
+        "sum_row_weights": 14326.9,
+        "weighted_error_count": 2630.2
       },
       "test_by_month": {
         "202403": {
@@ -28755,7 +28766,10 @@
         "fn": 6121,
         "tp": 3052,
         "weighted_score": 0.06332232117207698,
-        "all_zero_weighted_score": 0.07793737431772482
+        "all_zero_weighted_score": 0.07793737431772482,
+        "weighted_misclassification_rate": 0.1846247269123118,
+        "sum_row_weights": 14326.9,
+        "weighted_error_count": 2645.1
       },
       "test_by_month": {
         "202403": {
@@ -34825,7 +34839,10 @@
         "fn": 6246,
         "tp": 2927,
         "weighted_score": 0.0630135018672795,
-        "all_zero_weighted_score": 0.07793737431772482
+        "all_zero_weighted_score": 0.07793737431772482,
+        "weighted_misclassification_rate": 0.18372432277743264,
+        "sum_row_weights": 14326.9,
+        "weighted_error_count": 2632.2
       },
       "test_by_month": {
         "202403": {
@@ -41141,7 +41158,10 @@
         "fn": 6055,
         "tp": 3118,
         "weighted_score": 0.06312601742794216,
-        "all_zero_weighted_score": 0.07793737431772482
+        "all_zero_weighted_score": 0.07793737431772482,
+        "weighted_misclassification_rate": 0.18405237699711732,
+        "sum_row_weights": 14326.9,
+        "weighted_error_count": 2636.9
       },
       "test_by_month": {
         "202403": {
@@ -47458,7 +47478,10 @@
         "fn": 6280,
         "tp": 2893,
         "weighted_score": 0.06321459350761274,
-        "all_zero_weighted_score": 0.07793737431772482
+        "all_zero_weighted_score": 0.07793737431772482,
+        "weighted_misclassification_rate": 0.1843106324466563,
+        "sum_row_weights": 14326.9,
+        "weighted_error_count": 2640.6
       },
       "test_by_month": {
         "202403": {
@@ -54285,7 +54308,10 @@
         "fn": 6138,
         "tp": 3035,
         "weighted_score": 0.06282437996744229,
-        "all_zero_weighted_score": 0.07793737431772482
+        "all_zero_weighted_score": 0.07793737431772482,
+        "weighted_misclassification_rate": 0.18317291249328188,
+        "sum_row_weights": 14326.9,
+        "weighted_error_count": 2624.3
       },
       "test_by_month": {
         "202403": {

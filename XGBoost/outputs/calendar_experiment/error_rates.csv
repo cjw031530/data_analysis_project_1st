@@ -1,0 +1,9 @@
+﻿method,label,phase,misclassification_rate,weighted_misclassification_rate
+raw_minimal__no_month,원형 최소 전처리 · 시간 제외,screening,0.17825337546681988,0.1851900969504917
+raw_minimal__month_index,원형 최소 전처리 · 시간 포함,screening,0.17779852532797089,0.18479922383767597
+numeric_categories__no_month,숫자 범주를 수치형으로 · 시간 제외,screening,0.17727185674614573,0.1835847252371413
+numeric_categories__month_index,숫자 범주를 수치형으로 · 시간 포함,screening,0.17787034377094704,0.1846247269123118
+cardinality5__no_month,범주형 상한 5 · 시간 제외,screening,0.177846404289955,0.18372432277743264
+cardinality5__month_index,범주형 상한 5 · 시간 포함,screening,0.17763094896102652,0.18405237699711732
+cardinality5__month_index,범주형 상한 5 · 시간 포함,tuned,0.1761945801015034,0.1843106324466563
+raw_minimal__month_index,원형 최소 전처리 · 시간 포함,tuned,0.17578760892463852,0.18317291249328188

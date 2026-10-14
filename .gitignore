@@ -26,6 +26,7 @@ XGBoost/outputs/calendar_experiment/*
 !XGBoost/outputs/calendar_experiment/metrics.json
 !XGBoost/outputs/calendar_experiment/run_config.yaml
 !XGBoost/outputs/calendar_experiment/comparison.csv
+!XGBoost/outputs/calendar_experiment/error_rates.csv
 !XGBoost/outputs/calendar_experiment/paired_comparison.csv
 !XGBoost/outputs/calendar_experiment/fold_metrics.csv
 !XGBoost/outputs/calendar_experiment/monthly_metrics.csv

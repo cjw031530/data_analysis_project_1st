@@ -127,8 +127,15 @@ TPE를 적용한다. 검증에서 임계값·반복 횟수·튜닝 후보를 결
 기존 모델·예측 파일을 복사하지 않고 결과의 `checkpoint_path`로 출처를 남긴다.
 
 결과는 `outputs/calendar_experiment/`에 저장한다. `overview.png/pdf`는 3개 방법의
-시간 제외/포함 비교, 시간 추가에 따른 점수 차이, 월별 평가와 검증 성능을 보여준다.
-`paired_comparison.csv`는 시간 포함−제외의 차이를 저장하며 음수는 개선이다.
+시간 제외/포함 비교, 시간 추가에 따른 오분류율 차이, 월별 평가와 검증 성능을 보여준다.
+보고서와 그림에서는 일반 오분류율과 **가중치 합으로 정규화한 가중 오분류율**을 사용한다.
+일반 오분류율은 `오분류 건수 / 전체 행 수`이고, 가중 오분류율은
+`sum(row_weight * error) / sum(row_weight)`다. 기존 전체 행 수 분모의 평가값은
+재현성을 위해 JSON의 `weighted_score`와 CSV의 `test_weighted_score`에 보존한다.
+정규화한 값은 JSON의 `weighted_misclassification_rate`, 비교 CSV의 `test_weighted_error`,
+두 비율만 정리한 `error_rates.csv`에 저장한다. 두 정의는 분모가 다르다.
+`paired_comparison.csv`의 `weighted_error_delta`는 정규화한 가중 오분류율의
+시간 포함−제외 차이를 저장하며 음수는 개선이다.
 `tuning_comparison.png/pdf`는 공통 설정과 TPE 결과를 비교한다. `report.html`은
 이미지가 내장된 독립 보고서이며 표 정렬과 공통 설정/TPE 필터를 제공한다.
 `metrics.json`과 `comparison.csv`에는 기존 결과 재사용 여부를 표시한다.
